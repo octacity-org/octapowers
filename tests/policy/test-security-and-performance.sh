@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-router="$repo_root/skills/using-superpowers/SKILL.md"
+router="$repo_root/skills/using-octapowers/SKILL.md"
 security="$repo_root/skills/security-review/SKILL.md"
 security_metadata="$repo_root/skills/security-review/agents/openai.yaml"
 performance="$repo_root/skills/performance-investigation/SKILL.md"

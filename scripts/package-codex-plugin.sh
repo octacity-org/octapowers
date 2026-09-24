@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 #
-# Package the Superpowers Codex plugin as a rootless archive for portal upload.
-#
-# The Codex portal artifact differs from the old openai/plugins sync flow:
-# it is a standalone archive, but it still needs the OpenAI-owned
-# skills/*/agents/openai.yaml metadata that used to be preserved from the
-# destination plugin repo. Seed that metadata from a prior official package.
+# Package the Octapowers Codex plugin as a rootless archive for portal upload.
 
 set -euo pipefail
 
@@ -15,7 +10,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REF="HEAD"
 OUTPUT=""
 FORMAT=""
-METADATA_SOURCE=""
 ALLOW_DIRTY=0
 KEEP_STAGE=0
 
@@ -26,14 +20,10 @@ Usage:
 
 Options:
   --output PATH            Write archive to PATH.
-                           Default: ../_tmp/sup-codex-packaging/superpowers-VERSION.zip
+                           Default: ../_tmp/octapowers-packaging/octapowers-VERSION.zip
   --format FORMAT          Archive format: zip or tar.gz. Default: zip.
                            If --output ends in .zip, .tar.gz, or .tgz, that
                            extension is used when --format is omitted.
-  --metadata-source PATH   Prior official package directory, .zip, or .tar.gz used to
-                           seed skills/*/agents/openai.yaml.
-                           Default: ../_tmp/sup-codex-packaging/superpowers,
-                           falling back to superpowers.zip, then superpowers.tar.gz
   --ref REF                Git ref to package. Default: HEAD.
   --allow-dirty            Permit a dirty working tree. The archive still uses --ref.
   --keep-stage             Print and keep the temporary staging directory.
@@ -70,11 +60,6 @@ while [[ $# -gt 0 ]]; do
           die "--format must be zip or tar.gz"
           ;;
       esac
-      shift 2
-      ;;
-    --metadata-source)
-      [[ $# -ge 2 ]] || die "--metadata-source requires a path"
-      METADATA_SOURCE="$2"
       shift 2
       ;;
     --ref)
@@ -153,21 +138,8 @@ if [[ "$ALLOW_DIRTY" -ne 1 ]]; then
   fi
 fi
 
-if [[ -z "$METADATA_SOURCE" ]]; then
-  if [[ -d "$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers" ]]; then
-    METADATA_SOURCE="$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers"
-  elif [[ -f "$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers.zip" ]]; then
-    METADATA_SOURCE="$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers.zip"
-  elif [[ -f "$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers.tar.gz" ]]; then
-    METADATA_SOURCE="$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers.tar.gz"
-  else
-    die "no metadata source found; pass --metadata-source <prior package dir, zip, or tar.gz>"
-  fi
-fi
-
-WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/superpowers-codex-package.XXXXXX")"
+WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/octapowers-codex-package.XXXXXX")"
 STAGE="$WORK_DIR/payload"
-METADATA_WORK="$WORK_DIR/metadata"
 ARCHIVE_LIST="$WORK_DIR/archive-list"
 
 cleanup() {
@@ -179,56 +151,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$STAGE" "$METADATA_WORK"
-
-metadata_root_from_dir() {
-  local candidate="$1"
-  local nested
-
-  if [[ -d "$candidate/skills" ]]; then
-    printf '%s\n' "$candidate"
-    return 0
-  fi
-
-  nested="$(find "$candidate" -mindepth 2 -maxdepth 2 -type d -name skills -print -quit)"
-  if [[ -n "$nested" ]]; then
-    dirname "$nested"
-    return 0
-  fi
-
-  return 1
-}
-
-prepare_metadata_root() {
-  local source="$1"
-  local root
-
-  if [[ -d "$source" ]]; then
-    root="$(cd "$source" && pwd)"
-  elif [[ -f "$source" ]]; then
-    case "$source" in
-      *.tar.gz|*.tgz)
-        tar -xzf "$source" -C "$METADATA_WORK"
-        root="$METADATA_WORK"
-        ;;
-      *.zip)
-        command -v unzip >/dev/null || die "unzip not found in PATH"
-        unzip -q "$source" -d "$METADATA_WORK"
-        root="$METADATA_WORK"
-        ;;
-      *)
-        die "metadata source must be a directory, .zip, or .tar.gz: $source"
-        ;;
-    esac
-  else
-    die "metadata source does not exist: $source"
-  fi
-
-  metadata_root_from_dir "$root" ||
-    die "metadata source does not contain a skills/ directory: $source"
-}
-
-METADATA_ROOT="$(prepare_metadata_root "$METADATA_SOURCE")"
+mkdir -p "$STAGE"
 
 git -C "$REPO_ROOT" archive --format=tar "$REF" -- \
   .codex-plugin \
@@ -245,39 +168,17 @@ VERSION="$(jq -r '.version // empty' "$STAGE/.codex-plugin/plugin.json")"
 if [[ -z "$OUTPUT" ]]; then
   case "$FORMAT" in
     zip)
-      OUTPUT="$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers-$VERSION.zip"
+      OUTPUT="$REPO_ROOT/../_tmp/octapowers-packaging/octapowers-$VERSION.zip"
       ;;
     tar.gz)
-      OUTPUT="$REPO_ROOT/../_tmp/sup-codex-packaging/superpowers-$VERSION.tar.gz"
+      OUTPUT="$REPO_ROOT/../_tmp/octapowers-packaging/octapowers-$VERSION.tar.gz"
       ;;
   esac
 fi
 mkdir -p "$(dirname "$OUTPUT")"
 OUTPUT="$(cd "$(dirname "$OUTPUT")" && pwd)/$(basename "$OUTPUT")"
 
-missing_metadata=0
-while IFS= read -r skill_dir; do
-  skill_name="${skill_dir##*/}"
-  metadata_file="$METADATA_ROOT/skills/$skill_name/agents/openai.yaml"
-
-  if [[ ! -f "$metadata_file" ]]; then
-    echo "Missing OpenAI agent metadata for skill: $skill_name" >&2
-    missing_metadata=1
-    continue
-  fi
-
-  mkdir -p "$skill_dir/agents"
-  cp "$metadata_file" "$skill_dir/agents/openai.yaml"
-done < <(find "$STAGE/skills" -mindepth 1 -maxdepth 1 -type d -print | sort)
-
-if [[ "$missing_metadata" -ne 0 ]]; then
-  die "metadata source is incomplete"
-fi
-
 skill_count="$(find "$STAGE/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-metadata_count="$(find "$STAGE/skills" -path '*/agents/openai.yaml' -type f | wc -l | tr -d ' ')"
-[[ "$skill_count" == "$metadata_count" ]] ||
-  die "metadata count mismatch: $metadata_count metadata files for $skill_count skills"
 
 (
   cd "$STAGE"
@@ -294,7 +195,7 @@ case "$FORMAT" in
     (
       cd "$STAGE"
       rm -f "$OUTPUT"
-      COPYFILE_DISABLE=1 zip -X -q - -@ <"$ARCHIVE_LIST" >"$OUTPUT"
+      TZ=UTC COPYFILE_DISABLE=1 zip -X -q - -@ <"$ARCHIVE_LIST" >"$OUTPUT"
     )
     ;;
   tar.gz)

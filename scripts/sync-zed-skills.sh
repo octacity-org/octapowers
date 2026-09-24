@@ -11,10 +11,11 @@ SOURCE_DIR="$REPO_ROOT/skills"
 ZED_SKILLS_DIR="${OCTAPOWERS_ZED_SKILLS_DIR:-$HOME/.agents/skills}"
 CODEX_CONFIG="${OCTAPOWERS_CODEX_CONFIG:-$HOME/.codex/config.toml}"
 ZED_AGENTS="${OCTAPOWERS_ZED_AGENTS:-$HOME/.config/zed/AGENTS.md}"
+SETUP_ZED_ROUTER="${OCTAPOWERS_SETUP_ZED_ROUTER:-1}"
 MANIFEST="$ZED_SKILLS_DIR/.octapowers-managed"
 BLOCK_START="# octapowers-zed-skills:start"
 BLOCK_END="# octapowers-zed-skills:end"
-ROUTER_INSTRUCTION='For software-development work, invoke the `using-superpowers` skill before acting.'
+ROUTER_INSTRUCTION='For software-development work, invoke the `using-octapowers` skill before acting.'
 
 die() {
   echo "error: $*" >&2
@@ -48,6 +49,7 @@ WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/octapowers-zed-sync.XXXXXX")"
 CURRENT_MANIFEST="$WORK_DIR/current"
 STAGE="$WORK_DIR/stage"
 FILTERED_CONFIG="$WORK_DIR/config"
+FILTERED_ZED_AGENTS="$WORK_DIR/zed-agents"
 
 cleanup() {
   rm -rf "$WORK_DIR"
@@ -122,17 +124,31 @@ cp "$FILTERED_CONFIG" "$CODEX_CONFIG"
   printf '%s\n' "$BLOCK_END"
 } >>"$CODEX_CONFIG"
 
-mkdir -p "$(dirname "$ZED_AGENTS")"
-touch "$ZED_AGENTS"
-if ! grep -Fq 'invoke the `using-superpowers` skill before acting' "$ZED_AGENTS"; then
+if [[ "$SETUP_ZED_ROUTER" == "1" ]]; then
+  mkdir -p "$(dirname "$ZED_AGENTS")"
+  touch "$ZED_AGENTS"
+  ZED_BLOCK_START='<!-- octapowers-zed:start -->'
+  ZED_BLOCK_END='<!-- octapowers-zed:end -->'
+  start_count="$(grep -Fxc "$ZED_BLOCK_START" "$ZED_AGENTS" || true)"
+  end_count="$(grep -Fxc "$ZED_BLOCK_END" "$ZED_AGENTS" || true)"
+  [[ "$start_count" -le 1 && "$start_count" == "$end_count" ]] ||
+    die "malformed Octapowers block in $ZED_AGENTS"
+  awk -v start="$ZED_BLOCK_START" -v end="$ZED_BLOCK_END" '
+    $0 == start { skipping = 1; next }
+    $0 == end { skipping = 0; next }
+    !skipping { print }
+  ' "$ZED_AGENTS" >"$FILTERED_ZED_AGENTS"
+  cp "$FILTERED_ZED_AGENTS" "$ZED_AGENTS"
   {
-    printf '\n<!-- octapowers-zed:start -->\n'
+    printf '\n%s\n' "$ZED_BLOCK_START"
     printf '%s\n' "$ROUTER_INSTRUCTION"
-    printf '<!-- octapowers-zed:end -->\n'
+    printf '%s\n' "$ZED_BLOCK_END"
   } >>"$ZED_AGENTS"
 fi
 
 skill_count="$(wc -l <"$CURRENT_MANIFEST" | tr -d ' ')"
 echo "Copied $skill_count Octapowers skills to $ZED_SKILLS_DIR"
 echo "Updated Codex exclusions in $CODEX_CONFIG"
-echo "Confirmed the Zed router instruction in $ZED_AGENTS"
+if [[ "$SETUP_ZED_ROUTER" == "1" ]]; then
+  echo "Confirmed the Zed router instruction in $ZED_AGENTS"
+fi

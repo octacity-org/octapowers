@@ -39,6 +39,8 @@ Do not require a commit after every task. Do not require subagents, worktrees, o
 
 Save the plan to `docs/octapowers/plans/YYYY-MM-DD-<feature-name>.md`, unless the user specifies another location.
 
+When using this default location in a Git repository, ensure the project-root `.gitignore` ignores `/docs/octapowers/plans/` before saving the plan. Add the rule if needed without disturbing existing entries. This keeps temporary plans out of future commits; if a plan is already tracked, explain that `.gitignore` alone cannot untrack it. Do not remove a tracked plan without the user's request.
+
 Before delivery, check that:
 
 - every requirement is covered;

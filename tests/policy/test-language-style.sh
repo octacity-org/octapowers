@@ -20,7 +20,7 @@ for language in "${languages[@]}"; do
   rg -q "references/$language.md" "$skill/SKILL.md"
 done
 
-rg -q 'use `language-style`' "$root/skills/using-superpowers/SKILL.md"
+rg -q 'use `language-style`' "$root/skills/using-octapowers/SKILL.md"
 if rg -n 'TODO|\[TODO' "$skill"; then
   echo "language-style contains unfinished template text" >&2
   exit 1

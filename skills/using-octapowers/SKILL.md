@@ -1,5 +1,5 @@
 ---
-name: using-superpowers
+name: using-octapowers
 description: Always-active router for software work. Consult at the start of every request to select and apply relevant Octapowers skills proportionally, without turning ordinary implementation into a spec or approval process.
 ---
 
@@ -58,6 +58,11 @@ Invoke a skill when its specialized workflow materially helps the task or the us
 - Use `test-driven-development` by default for every non-tiny implementation or behavior change. Skip it for trivial mechanical edits. Skip TDD when the user explicitly says not to write tests, not to use TDD, or gives an equivalent instruction.
 - Before claiming completion: use `verification-before-completion`.
 - Brainstorming, ideation, option exploration, or written design explicitly requested: use `brainstorming`. Only the written-design mode creates an artifact and approval gate.
+- Visualization explicitly requested: use `show-me`.
+- GitHub issue or pull-request inspection: use `inspecting-github-work`.
+- Reviewing a GitHub pull request file by file: use `reviewing-github-pr`.
+- Creating a GitHub issue or pull request: use `creating-github-work`.
+- Implementing work from a GitHub issue or pull request: use `fixing-github-work`.
 - Written implementation plan explicitly requested: use `writing-plans`.
 - Subagent-driven development, parallel-agent dispatch, and worktrees: use only when the user explicitly requests them.
 - Code review: perform proportional self-review when it materially improves confidence; use an independent reviewer only when the user explicitly requests one.
@@ -85,3 +90,6 @@ Whenever this changes an `AGENTS.md`, state that `AGENTS.md` was updated and sum
 When platform-specific tool behavior matters, read the matching reference:
 
 - Codex: `references/codex-tools.md`
+- Antigravity: `references/antigravity.md`
+- OpenCode: `references/opencode.md`
+- Codebuff / Freebuff: `references/codebuff.md`

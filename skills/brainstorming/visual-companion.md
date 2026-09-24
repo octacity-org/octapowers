@@ -1,10 +1,10 @@
-# Visual Companion Guide
+# Interactive Visual Companion Guide
 
-Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+Browser-based companion for interactive mockups, diagrams, and options. Read this guide only after `show-me` selects an interactive browser artifact.
 
 ## When to Use
 
-Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
+Use this companion only when the user explicitly wants an interactive browser artifact and a text diagram, Mermaid diagram, or native host visualization is insufficient. Decide per-question, not per-session.
 
 **Use the browser** when the content itself is visual:
 

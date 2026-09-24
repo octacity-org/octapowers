@@ -2,14 +2,13 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-router="$repo_root/skills/using-superpowers/SKILL.md"
+router="$repo_root/skills/using-octapowers/SKILL.md"
 brainstorming="$repo_root/skills/brainstorming/SKILL.md"
 plans="$repo_root/skills/writing-plans/SKILL.md"
 tdd="$repo_root/skills/test-driven-development/SKILL.md"
 executing="$repo_root/skills/executing-plans/SKILL.md"
 subagents="$repo_root/skills/subagent-driven-development/SKILL.md"
 worktrees="$repo_root/skills/using-git-worktrees/SKILL.md"
-brainstorm_visual="$repo_root/skills/brainstorming/visual-companion.md"
 writing_skills="$repo_root/skills/writing-skills/SKILL.md"
 parallel_agents="$repo_root/skills/dispatching-parallel-agents/SKILL.md"
 finishing="$repo_root/skills/finishing-a-development-branch/SKILL.md"
@@ -74,10 +73,15 @@ assert_contains "$router" 'state that `AGENTS.md` was updated and summarize what
 assert_contains "$router" 'Do not persist secrets, temporary task details, guesses'
 assert_contains "$brainstorming" "Exploratory brainstorming"
 assert_contains "$brainstorming" "Do not create a document or approval gate."
-assert_contains "$brainstorming" "If the request says only “brainstorm,” use exploratory brainstorming."
+assert_contains "$brainstorming" 'If the request says only “brainstorm,” use exploratory brainstorming.'
 assert_contains "$brainstorming" "This approval gate applies only because the user explicitly requested a persistent written design workflow."
 assert_contains "$brainstorming" "In either mode"
 assert_contains "$plans" "only when the user explicitly requests a written implementation plan"
+assert_contains "$plans" 'ensure the project-root `.gitignore` ignores `/docs/octapowers/plans/`'
+git -C "$repo_root" check-ignore -q docs/octapowers/plans/example.md || {
+  echo "FAIL: repository does not ignore temporary implementation plans" >&2
+  exit 1
+}
 assert_contains "$plans" "If the user explicitly says to plan and then execute automatically, that authorization replaces the approval pause."
 assert_contains "$router" 'Use `test-driven-development` by default for every non-tiny implementation or behavior change.'
 assert_contains "$router" 'Skip TDD when the user explicitly says not to write tests, not to use TDD, or gives an equivalent instruction.'
@@ -99,7 +103,7 @@ assert_contains "$worktrees" "Verify a project-local worktree directory is ignor
 assert_contains "$worktrees" "Do not commit the ignore change automatically."
 assert_contains "$worktrees" "Follow project instructions and existing lockfiles"
 assert_contains "$worktrees" "Run the project's focused baseline verification"
-assert_contains "$brainstorming" "[visual-companion.md](visual-companion.md)"
+assert_contains "$brainstorming" 'invoke `show-me`'
 assert_contains "$writing_skills" "Do not require subagent pressure testing for every edit."
 assert_contains "$parallel_agents" "only when the user explicitly requests parallel agents or delegation"
 assert_contains "$parallel_agents" "Assign non-overlapping ownership"

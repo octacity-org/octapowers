@@ -34,7 +34,7 @@ if not isinstance(plugins, list):
     raise AssertionError("plugins must be a list")
 
 matching_plugins = [plugin for plugin in plugins if plugin.get("name") == "octapowers"]
-assert_equal(len(matching_plugins), 1, "superpowers plugin entry count")
+assert_equal(len(matching_plugins), 1, "octapowers plugin entry count")
 
 plugin = matching_plugins[0]
 assert_equal(plugin.get("source"), {"source": "url", "url": "./"}, "plugin source")

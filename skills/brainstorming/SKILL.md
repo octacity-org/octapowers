@@ -53,8 +53,8 @@ After approval:
 
 Do not commit the design unless the user requests a commit or the surrounding workflow explicitly includes commits.
 
-## Visual Companion
+## Visual Explanation
 
-In either mode, when a question is materially easier to understand visually—such as a UI layout, architecture diagram, flow, spatial relationship, or side-by-side visual direction—read [visual-companion.md](visual-companion.md) and offer or use the browser-based companion. Keep textual requirements, tradeoffs, and ordinary clarification in the conversation.
+In either mode, when the user explicitly asks to see or visualize a UI layout, architecture, flow, spatial relationship, or comparison, invoke `show-me`. Keep textual requirements, tradeoffs, and ordinary clarification in the conversation.
 
-The companion supports brainstorming; it does not create a written-design or approval requirement.
+Visual explanation supports brainstorming; it does not create a written-design or approval requirement.

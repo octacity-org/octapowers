@@ -15,7 +15,7 @@ const hook = payload.hookSpecificOutput;
 if (!hook || hook.hookEventName !== "SessionStart") process.exit(1);
 if (typeof hook.additionalContext !== "string") process.exit(1);
 if (!hook.additionalContext.includes("You have Octapowers")) process.exit(1);
-if (!hook.additionalContext.includes("octapowers:using-superpowers")) process.exit(1);
+if (!hook.additionalContext.includes("octapowers:using-octapowers")) process.exit(1);
 '
 }
 

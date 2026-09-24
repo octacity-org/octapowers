@@ -1,4 +1,18 @@
-# Superpowers Release Notes
+# Octapowers Release Notes
+
+## v1.1.0
+
+- Renamed the always-active router skill from `using-superpowers` to `using-octapowers`. Existing managed skill copies and router instructions are updated when the installation sync scripts run again.
+- Added global skill installation and bootstrap guidance for Antigravity, OpenCode, and Codebuff / Freebuff. The installers preserve unrelated user instructions and skills.
+- Added GitHub skills for inspecting issues and pull requests, reviewing pull requests file by file, creating issues and pull requests, and implementing scoped fixes.
+- Added `show-me` for requested visual explanations and made brainstorming's interactive companion opt-in through that skill.
+- Added a read-only installation doctor that compares local agent copies with the current checkout.
+- Made Codex packaging self-contained and deterministic without a prior Superpowers package. The Codex manifest explicitly disables Claude Code hook auto-discovery.
+- Updated the plans skill to add a project-root Git ignore rule when it saves a temporary plan to `docs/octapowers/plans/`.
+
+These notes describe the release contents; they do not imply that every agent integration has been tested in a live session.
+
+# Superpowers Release Notes (upstream archive)
 
 ## v6.1.1 (2026-07-02)
 

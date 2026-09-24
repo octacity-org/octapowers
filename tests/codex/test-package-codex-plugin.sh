@@ -117,36 +117,20 @@ read_archive_file() {
   esac
 }
 
-write_metadata_fixture() {
-  local destination="$1"
-  local skill
-
-  while IFS= read -r skill; do
-    mkdir -p "$destination/skills/$skill/agents"
-    cat >"$destination/skills/$skill/agents/openai.yaml" <<EOF
-interface:
-  display_name: "$skill"
-  short_description: "Fixture metadata for $skill"
-EOF
-  done < <(find "$REPO_ROOT/skills" -mindepth 1 -maxdepth 1 -type d -print | sed 's#.*/##' | sort)
-}
-
 echo "Codex package archive tests"
 
-metadata_source="$TEST_ROOT/metadata-source"
-archive="$TEST_ROOT/superpowers"
-tar_archive="$TEST_ROOT/superpowers.tar.gz"
+archive="$TEST_ROOT/octapowers.zip"
+tar_archive="$TEST_ROOT/octapowers.tar.gz"
 extracted="$TEST_ROOT/extracted"
 tar_extracted="$TEST_ROOT/tar-extracted"
-write_metadata_fixture "$metadata_source"
 
 source_hooks="$(python3 -c 'import json; print(json.load(open("'"$REPO_ROOT"'/.codex-plugin/plugin.json")).get("hooks"))')"
-assert_equals "$source_hooks" "{}" "source Codex manifest suppresses local hook auto-discovery"
+assert_equals "$source_hooks" "{}" "source Codex manifest suppresses Claude Code hook auto-discovery"
 
-if output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$metadata_source" --output "$archive" 2>&1)"; then
-  pass "package script exits successfully"
+if output="$("$SCRIPT_UNDER_TEST" --allow-dirty --output "$archive" 2>&1)"; then
+  pass "package script succeeds without external metadata"
 else
-  fail "package script exits successfully"
+  fail "package script succeeds without external metadata"
   printf '%s\n' "$output" | sed 's/^/      /'
 fi
 
@@ -167,17 +151,18 @@ unexpected_pattern='(^octapowers/|^\.agents/|^hooks/|package\.json$|^\.git|^\.py
 assert_not_matches "$archive_paths" "$unexpected_pattern" "archive excludes source-only paths"
 assert_contains "$archive_paths" ".codex-plugin/plugin.json" "archive includes Codex manifest"
 assert_contains "$archive_paths" "skills/brainstorming/SKILL.md" "archive includes skills"
-assert_contains "$archive_paths" "skills/brainstorming/agents/openai.yaml" "archive includes OpenAI skill metadata"
+assert_contains "$archive_paths" "skills/language-style/agents/openai.yaml" "archive includes repository-owned OpenAI skill metadata"
+assert_not_matches "$archive_paths" "^skills/brainstorming/agents/openai.yaml$" "archive does not synthesize unnecessary skill metadata"
 assert_contains "$archive_paths" "assets/app-icon.png" "archive includes app icon"
 assert_contains "$archive_paths" "assets/superpowers-small.svg" "archive includes composer icon"
 
 manifest_summary="$(read_archive_file "$archive" .codex-plugin/plugin.json | python3 -c 'import json,sys; data=json.load(sys.stdin); print("\t".join([data["name"], data["version"], data["skills"], str(data.get("hooks"))]))')"
-expected_version="$(python3 -c 'import json; print(json.load(open("'"$REPO_ROOT"'/.codex-plugin/plugin.json"))["version"])')"
-assert_equals "$manifest_summary" "superpowers	$expected_version	./skills/	$source_hooks" "archive manifest preserves source hooks"
+expected_manifest_summary="$(git -C "$REPO_ROOT" show HEAD:.codex-plugin/plugin.json | python3 -c 'import json,sys; data=json.load(sys.stdin); print("\t".join([data["name"], data["version"], data["skills"], str(data.get("hooks"))]))')"
+assert_equals "$manifest_summary" "$expected_manifest_summary" "archive manifest matches packaged Git ref"
 
 skill_count="$(find "$extracted/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-metadata_count="$(find "$extracted/skills" -path '*/agents/openai.yaml' -type f | wc -l | tr -d ' ')"
-assert_equals "$metadata_count" "$skill_count" "every packaged skill has OpenAI metadata"
+source_skill_count="$(git -C "$REPO_ROOT" ls-tree -d --name-only HEAD:skills | wc -l | tr -d ' ')"
+assert_equals "$skill_count" "$source_skill_count" "archive includes every committed skill"
 
 if [[ -x "$extracted/skills/subagent-driven-development/scripts/task-brief" ]]; then
   pass "archive preserves executable script mode"
@@ -195,7 +180,7 @@ PY
 )"
 assert_equals "$zip_times" "(1980, 1, 1, 0, 0, 0)" "zip archive normalizes entry timestamps"
 
-if tar_output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$metadata_source" --format tar.gz --output "$tar_archive" 2>&1)"; then
+if tar_output="$("$SCRIPT_UNDER_TEST" --allow-dirty --format tar.gz --output "$tar_archive" 2>&1)"; then
   pass "package script writes explicit tar.gz archive"
 else
   fail "package script writes explicit tar.gz archive"
@@ -210,60 +195,22 @@ assert_equals "$tar_archive_paths" "$archive_paths" "zip and tar.gz archives con
 tar_task_brief_mode="$(tar -tzvf "$tar_archive" skills/subagent-driven-development/scripts/task-brief | awk '{print $1}')"
 assert_equals "$tar_task_brief_mode" "-rwxr-xr-x" "tar.gz archive preserves executable script mode"
 
-tar_metadata_times="$(tar -tzvf "$tar_archive" | awk '{print $6, $7, $8}' | sort -u)"
-assert_equals "$tar_metadata_times" "Dec 31 1969" "tar.gz archive normalizes entry timestamps"
+tar_metadata_times="$(python3 - "$tar_archive" <<'PY'
+import sys
+import tarfile
 
-metadata_archive="$TEST_ROOT/metadata-source.tar.gz"
-metadata_zip="$TEST_ROOT/metadata-source.zip"
-archive_from_tar_source="$TEST_ROOT/superpowers-from-tar-source.zip"
-archive_from_zip_source="$TEST_ROOT/superpowers-from-zip-source.zip"
-(
-  cd "$metadata_source"
-  tar -czf "$metadata_archive" .
-  zip -X -q -r "$metadata_zip" .
-)
+with tarfile.open(sys.argv[1], 'r:gz') as archive:
+    print(sorted({entry.mtime for entry in archive.getmembers()}))
+PY
+)"
+assert_equals "$tar_metadata_times" "[0]" "tar.gz archive normalizes entry timestamps"
 
-if output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$metadata_archive" --output "$archive_from_tar_source" 2>&1)"; then
-  pass "package script accepts tarball metadata source"
+repeat_archive="$TEST_ROOT/octapowers-repeat.zip"
+if "$SCRIPT_UNDER_TEST" --allow-dirty --output "$repeat_archive" >/dev/null 2>&1 && cmp -s "$archive" "$repeat_archive"; then
+  pass "repeated packaging produces identical bytes"
 else
-  fail "package script accepts tarball metadata source"
-  printf '%s\n' "$output" | sed 's/^/      /'
+  fail "repeated packaging produces identical bytes"
 fi
-
-if cmp -s "$archive" "$archive_from_tar_source"; then
-  pass "tarball metadata source produces identical archive"
-else
-  fail "tarball metadata source produces identical archive"
-fi
-
-if output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$metadata_zip" --output "$archive_from_zip_source" 2>&1)"; then
-  pass "package script accepts zip metadata source"
-else
-  fail "package script accepts zip metadata source"
-  printf '%s\n' "$output" | sed 's/^/      /'
-fi
-
-if cmp -s "$archive" "$archive_from_zip_source"; then
-  pass "zip metadata source produces identical archive"
-else
-  fail "zip metadata source produces identical archive"
-fi
-
-incomplete_metadata="$TEST_ROOT/incomplete-metadata"
-mkdir -p "$incomplete_metadata/skills/brainstorming/agents"
-cp "$metadata_source/skills/brainstorming/agents/openai.yaml" \
-  "$incomplete_metadata/skills/brainstorming/agents/openai.yaml"
-
-set +e
-missing_output="$("$SCRIPT_UNDER_TEST" --allow-dirty --metadata-source "$incomplete_metadata" --output "$TEST_ROOT/missing.tar.gz" 2>&1)"
-missing_status=$?
-set -e
-if [[ "$missing_status" -ne 0 ]]; then
-  pass "package script rejects incomplete metadata source"
-else
-  fail "package script rejects incomplete metadata source"
-fi
-assert_contains "$missing_output" "ERROR: metadata source is incomplete" "incomplete metadata reports clear error"
 
 dirty_repo="$TEST_ROOT/dirty-repo"
 git clone -q --no-local "$REPO_ROOT" "$dirty_repo"
@@ -272,7 +219,6 @@ set +e
 dirty_output="$(
   cd "$dirty_repo"
   scripts/package-codex-plugin.sh \
-    --metadata-source "$metadata_source" \
     --output "$TEST_ROOT/dirty.zip" 2>&1
 )"
 dirty_status=$?
