@@ -4,7 +4,7 @@ Octapowers is an independent fork of [Superpowers](https://github.com/obra/super
 
 It keeps systematic debugging, test-driven development, verification, code review, worktrees, and agent-driven execution while avoiding mandatory specs and written plans for ordinary implementation work.
 
-Octapowers does not track Superpowers upstream. Its workflow, releases, and future development are maintained independently under [`0ctacity/octapowers`](https://github.com/0ctacity/octapowers).
+Octapowers does not track Superpowers upstream. Its workflow, releases, and future development are maintained independently under [`octacity-org/octapowers`](https://github.com/octacity-org/octapowers).
 
 ## Supported coding agents
 
@@ -23,13 +23,13 @@ Other coding-agent harnesses are not currently supported. Gemini CLI can discove
 Add the Octapowers marketplace:
 
 ```bash
-codex plugin marketplace add 0ctacity/octapowers
+codex plugin marketplace add octacity-org/octapowers
 ```
 
 Install Octapowers:
 
 ```bash
-codex plugin add octapowers@0ctacity
+codex plugin add octapowers@octacity-org
 ```
 
 Start a new Codex task after installation.
@@ -37,8 +37,8 @@ Start a new Codex task after installation.
 To update later:
 
 ```bash
-codex plugin marketplace upgrade 0ctacity
-codex plugin add octapowers@0ctacity
+codex plugin marketplace upgrade octacity-org
+codex plugin add octapowers@octacity-org
 ```
 
 Start another new task so Codex loads the updated plugin.
@@ -48,13 +48,13 @@ Start another new task so Codex loads the updated plugin.
 Add the Octapowers marketplace:
 
 ```text
-/plugin marketplace add 0ctacity/octapowers
+/plugin marketplace add octacity-org/octapowers
 ```
 
 Install Octapowers:
 
 ```text
-/plugin install octapowers@0ctacity
+/plugin install octapowers@octacity-org
 ```
 
 Run `/reload-plugins` after installation so Claude Code activates Octapowers in the current session.
@@ -64,7 +64,7 @@ Run `/reload-plugins` after installation so Claude Code activates Octapowers in 
 Clone Octapowers, then install every skill globally:
 
 ```bash
-git clone https://github.com/0ctacity/octapowers.git
+git clone https://github.com/octacity-org/octapowers.git
 cd octapowers
 ./scripts/sync-antigravity-skills.sh
 ```
@@ -83,7 +83,7 @@ git pull
 Clone Octapowers, then install the shared global skills and router instructions:
 
 ```bash
-git clone https://github.com/0ctacity/octapowers.git
+git clone https://github.com/octacity-org/octapowers.git
 cd octapowers
 ./scripts/sync-opencode-codebuff-skills.sh
 ```

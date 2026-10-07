@@ -1,5 +1,13 @@
 # Octapowers Release Notes
 
+## v1.2.1
+
+- Renamed both marketplace identifiers to `octacity-org` and updated README installation and update commands.
+- Updated repository, homepage, author, and website URLs to the `octacity-org` GitHub organization.
+- Updated the installation doctor's fallback publisher and marketplace validation to use the new identifier.
+
+Existing installations should register the marketplace under its new name and reinstall using the updated README instructions.
+
 ## v1.2.0
 
 - Added `simplify` for clearer implementations and behavior-preserving refactoring, with router guidance and a README catalog entry.

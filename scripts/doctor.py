@@ -62,7 +62,7 @@ def main() -> None:
     manifest = read_json(ROOT / ".codex-plugin/plugin.json")
     marketplace = read_json(ROOT / ".agents/plugins/marketplace.json")
     plugin = manifest.get("name", "octapowers")
-    publisher = marketplace.get("name", "0ctacity")
+    publisher = marketplace.get("name", "octacity-org")
     source = skill_dirs(ROOT / "skills")
     print(f"Octapowers checkout: {manifest.get('version', 'unknown version')}, {len(source)} skills")
 

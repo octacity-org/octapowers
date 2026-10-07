@@ -1,12 +1,12 @@
 {
   "name": "octapowers",
   "description": "Octapowers skills for Claude Code: TDD, debugging, collaboration patterns, and proven techniques",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "octacity"
   },
-  "homepage": "https://github.com/0ctacity/octapowers",
-  "repository": "https://github.com/0ctacity/octapowers",
+  "homepage": "https://github.com/octacity-org/octapowers",
+  "repository": "https://github.com/octacity-org/octapowers",
   "license": "MIT",
   "keywords": [
     "skills",

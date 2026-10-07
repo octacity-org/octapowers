@@ -1,5 +1,5 @@
 {
-  "name": "0ctacity",
+  "name": "octacity-org",
   "description": "Octapowers skills for the Octacity community",
   "owner": {
     "name": "octacity"
@@ -8,7 +8,7 @@
     {
       "name": "octapowers",
       "description": "Octapowers skills for Claude Code: TDD, debugging, collaboration patterns, and proven techniques",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "source": "./",
       "author": {
         "name": "octacity"
