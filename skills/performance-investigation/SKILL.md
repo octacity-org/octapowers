@@ -65,7 +65,7 @@ Make the smallest change that tests the confirmed hypothesis.
 - Avoid trading a measured bottleneck for an unbounded resource cost.
 - Accept added complexity only for a demonstrated, worthwhile improvement.
 
-Use test-driven development for non-tiny production changes unless the user overrides it. Separately establish correctness coverage and retain a reproducible performance measurement. Do not treat a noisy benchmark threshold as an ordinary correctness test unless it is stable enough for reliable automation.
+Behavior-preserving optimizations use existing correctness coverage and before-and-after measurements. Add focused coverage for important unprotected behavior. Use test-driven development for intentional behavior changes or correctness fixes unless the user overrides it. Do not treat a noisy benchmark threshold as an ordinary correctness test unless it is stable enough for reliable automation.
 
 ## Compare, Stop, and Report
 

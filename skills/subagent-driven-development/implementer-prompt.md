@@ -5,8 +5,6 @@ Use this template when dispatching an implementer subagent.
 ```
 Subagent (general-purpose):
   description: "Implement Task N: [task name]"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
   prompt: |
     You are implementing Task N: [task name]
 
@@ -21,13 +19,9 @@ Subagent (general-purpose):
 
     ## Before You Begin
 
-    If you have questions about:
-    - The requirements or acceptance criteria
-    - The approach or implementation strategy
-    - Dependencies or assumptions
-    - Anything unclear in the task description
-
-    **Ask them now.** Raise any concerns before starting work.
+    Resolve routine implementation choices from the brief and repository
+    conventions. Ask the main agent when missing context or a consequential
+    ambiguity would change the required outcome or exceed your ownership.
 
     ## Your Job
 
@@ -40,11 +34,14 @@ Subagent (general-purpose):
 
     Work from: [directory]
 
-    **While you work:** If you encounter something unexpected or unclear, **ask questions**.
-    It's always OK to pause and clarify. Don't guess or make assumptions.
+    **While you work:** Investigate unexpected failures within your scope.
+    State meaningful assumptions and escalate decisions you cannot resolve
+    from available evidence.
 
     While iterating, run the focused test for what you're changing; run the
-    full suite once before reporting, not after every edit.
+    checks required by the brief before reporting. The main agent runs
+    integrated verification; a full suite is required only by the brief,
+    repository policy, or a concrete unresolved risk.
 
     Do not commit, push, merge, open a PR, or alter branch history. The main
     agent owns Git history and integration.
@@ -68,9 +65,9 @@ Subagent (general-purpose):
     no work. You will not be penalized for escalating.
 
     **STOP and escalate when:**
-    - The task requires architectural decisions with multiple valid approaches
+    - A consequential architectural decision cannot be resolved from the brief
     - You need to understand code beyond what was provided and can't find clarity
-    - You feel uncertain about whether your approach is correct
+    - Correctness remains uncertain after focused investigation and verification
     - The task involves restructuring existing code in ways the plan didn't anticipate
     - You've been reading file after file trying to understand the system without progress
 
@@ -102,7 +99,7 @@ Subagent (general-purpose):
     - Do tests actually verify behavior (not just mock behavior)?
     - Did I follow TDD if required?
     - Are tests comprehensive?
-    - Is the test output pristine (no stray warnings or noise)?
+    - Did I distinguish new failures or warnings from known baseline output?
 
     If you find issues during self-review, fix them now before reporting.
 
@@ -128,7 +125,7 @@ Subagent (general-purpose):
     report file):
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - Files changed
-    - One-line test summary (e.g. "14/14 passing, output pristine")
+    - One-line test summary (e.g. "14/14 passing; known baseline warning unchanged")
     - Your concerns, if any
     - The report file path
 

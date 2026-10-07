@@ -8,7 +8,7 @@ Tests must verify real behavior, not mock behavior. Mocks are a means to isolate
 
 **Core principle:** Test what the code does, not what the mocks do.
 
-**Following strict TDD prevents these anti-patterns.**
+**TDD provides feedback on test design; test-first ordering alone does not prevent these anti-patterns.**
 
 ## The Iron Laws
 
@@ -194,16 +194,16 @@ const mockResponse = {
 - **Tests pass but integration fails** - Mock incomplete, real API complete
 - **False confidence** - Test proves nothing about real behavior
 
-**The Iron Rule:** Mock the COMPLETE data structure as it exists in reality, not just fields your immediate test uses.
+**The Rule:** Use a valid fixture that preserves the contract the tested path depends on, including fields consumed downstream. Include optional or unrelated fields when they affect behavior; do not automatically reproduce every documented field.
 
 **The fix:**
 ```typescript
-// ✅ GOOD: Mirror real API completeness
+// ✅ GOOD: Preserve the contract used by this path
 const mockResponse = {
   status: 'success',
   data: { userId: '123', name: 'Alice' },
   metadata: { requestId: 'req-789', timestamp: 1234567890 }
-  // All fields real API returns
+  // Include metadata required by downstream consumers
 };
 ```
 
@@ -211,18 +211,18 @@ const mockResponse = {
 
 ```
 BEFORE creating mock responses:
-  Check: "What fields does the real API response contain?"
+  Check: "What response contract does the tested path depend on?"
 
   Actions:
     1. Examine actual API response from docs/examples
-    2. Include ALL fields system might consume downstream
-    3. Verify mock matches real response schema completely
+    2. Include required fields and fields consumed downstream
+    3. Verify field types and relevant behavior match the real contract
 
   Critical:
-    If you're creating a mock, you must understand the ENTIRE structure
-    Partial mocks fail silently when code depends on omitted fields
+    Understand the contract exercised by the tested path
+    Omitting fields that path depends on can produce false confidence
 
-  If uncertain: Include all documented fields
+  If uncertain: Inspect the consumers or use a representative real fixture
 ```
 
 ## Anti-Pattern 5: Integration Tests as Afterthought
@@ -260,15 +260,15 @@ TDD cycle:
 
 **Consider:** Integration tests with real components often simpler than complex mocks
 
-## TDD Prevents These Anti-Patterns
+## TDD Provides Feedback on These Anti-Patterns
 
 **Why TDD helps:**
 1. **Write test first** → Forces you to think about what you're actually testing
-2. **Watch it fail** → Confirms test tests real behavior, not mocks
-3. **Minimal implementation** → No test-only methods creep in
+2. **Watch it fail** → Check that the failure reflects missing real behavior
+3. **Minimal implementation** → Helps avoid unnecessary test-only methods
 4. **Real dependencies** → You see what the test actually needs before mocking
 
-**If you're testing mock behavior, you violated TDD** - you added mocks without watching test fail against real code first.
+**A test can follow red-green-refactor and still test only mock behavior.** Check that its assertions establish real behavior through the tested interface.
 
 ## Quick Reference
 
@@ -277,7 +277,7 @@ TDD cycle:
 | Assert on mock elements | Test real component or unmock it |
 | Test-only methods in production | Move to test utilities |
 | Mock without understanding | Understand dependencies first, mock minimally |
-| Incomplete mocks | Mirror real API completely |
+| Incomplete mocks | Preserve the contract used by the tested path |
 | Tests as afterthought | TDD - tests first |
 | Over-complex mocks | Consider integration tests |
 

@@ -31,15 +31,11 @@ For each task:
 
 After all tasks complete, run verification appropriate to the change and report the result. Use `finishing-a-development-branch` only when the user asks to merge, open a PR, clean up, or otherwise finish the branch workflow.
 
-## When to Stop and Ask for Help
+## Resolve Failures and Blockers
 
-**STOP executing immediately when:**
-- Hit a blocker (missing dependency, test fails, instruction unclear)
-- Plan has critical gaps preventing starting
-- You don't understand an instruction
-- Verification fails repeatedly
+Investigate ordinary test failures and setup problems within the approved scope. Use `systematic-debugging` when needed, distinguish expected TDD failures from regressions, and continue independent tasks when safe.
 
-**Ask for clarification rather than guessing.**
+Ask only when progress requires a missing user decision, permission, unavailable external resource, or material change to the plan's goal or constraints. Report the evidence, attempted resolution, and exact decision needed. Repeated failures call for reassessing the hypothesis, not automatically handing the problem back to the user.
 
 ## When to Revisit Earlier Steps
 
@@ -47,14 +43,14 @@ After all tasks complete, run verification appropriate to the change and report 
 - Partner updates the plan based on your feedback
 - Fundamental approach needs rethinking
 
-**Don't force through blockers** - stop and ask.
+Preserve the plan's intent and constraints; resolve incidental implementation details from repository evidence.
 
 ## Remember
 - Review plan critically first
-- Follow plan steps exactly
+- Follow the plan's intent and constraints
 - Don't skip verifications
 - Reference skills when plan says to
-- Stop when blocked, don't guess
+- Resolve routine failures; escalate consequential blockers with evidence
 - Respect repository instructions and the user's requested branch workflow
 
 ## Integration

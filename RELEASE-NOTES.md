@@ -1,5 +1,18 @@
 # Octapowers Release Notes
 
+## v1.2.0
+
+- Added `simplify` for clearer implementations and behavior-preserving refactoring, with router guidance and a README catalog entry.
+- Refined TDD to select one meaningful test at a time, reuse existing coverage, avoid duplicate tests, and stop when required behavior and relevant risks are covered. Pure refactors use a verified green baseline.
+- Updated testing guidance to preserve the contract exercised by mock fixtures and clarify that test-first ordering alone does not prevent poor tests.
+- Replaced blanket validation at every layer with checks justified by distinct invariants, trust boundaries, or independently reachable paths.
+- Made plan execution investigate routine failures and aligned design prerequisites with unresolved product or architectural decisions.
+- Removed stale model-selection instructions from delegation templates and made verification proportional to each assignment, with integrated checks owned by the main agent.
+- Added uncommitted and staged change support to the code-review template and aligned worktree use with explicit user authorization.
+- Updated performance guidance to use correctness coverage and before-and-after measurements for behavior-preserving optimizations.
+
+These are instruction and policy changes; their effects on agent behavior have not been evaluated across live sessions.
+
 ## v1.1.0
 
 - Renamed the always-active router skill from `using-superpowers` to `using-octapowers`. Existing managed skill copies and router instructions are updated when the installation sync scripts run again.

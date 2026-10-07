@@ -2,22 +2,22 @@
 
 ## Overview
 
-When you fix a bug caused by invalid data, adding validation at one place feels sufficient. But that single check can be bypassed by different code paths, refactoring, or mocks.
+When invalid data causes a bug, trace its origin and the operation that needs protection. Fix the cause and validate at the authoritative boundary. Add further checks only when evidence shows that the boundary can legitimately be bypassed or a different invariant needs protection.
 
-**Core principle:** Validate at EVERY layer data passes through. Make the bug structurally impossible.
+**Core principle:** Each additional check needs a distinct invariant, trust boundary, or independently reachable path.
 
-## Why Multiple Layers
+## Choose Necessary Controls
 
-Single validation: "We fixed the bug"
-Multiple layers: "We made the bug impossible"
+Identify the contract at each relevant boundary. Avoid repeating the same validation along a path whose upstream contract already guarantees it. A mock bypassing a real contract is usually a test-fixture problem, not evidence that production needs another check.
 
-Different layers catch different cases:
-- Entry validation catches most bugs
-- Business logic catches edge cases
-- Environment guards prevent context-specific dangers
-- Debug logging helps when other layers fail
+Possible controls serve different purposes; they are not four mandatory layers:
 
-## The Four Layers
+- Entry validation establishes the accepted input contract.
+- Business validation enforces operation-specific invariants.
+- Environment guards protect a genuine execution boundary.
+- Debug logging provides evidence; it does not prevent invalid operations.
+
+## Examples of Controls
 
 ### Layer 1: Entry Point Validation
 **Purpose:** Reject obviously invalid input at API boundary
@@ -56,10 +56,9 @@ function initializeWorkspace(projectDir: string, sessionId: string) {
 async function gitInit(directory: string) {
   // In tests, refuse git init outside temp directories
   if (process.env.NODE_ENV === 'test') {
-    const normalized = normalize(resolve(directory));
-    const tmpDir = normalize(resolve(tmpdir()));
+    const relativePath = relative(resolve(tmpdir()), resolve(directory));
 
-    if (!normalized.startsWith(tmpDir)) {
+    if (isAbsolute(relativePath) || relativePath === '..' || relativePath.startsWith(`..${sep}`)) {
       throw new Error(
         `Refusing git init outside temp dir during tests: ${directory}`
       );
@@ -68,6 +67,8 @@ async function gitInit(directory: string) {
   // ... proceed
 }
 ```
+
+This lexical check uses Node's `relative`, `resolve`, `isAbsolute`, and `sep` from `node:path`. It does not establish containment through symlinks. Prefer controlling test directories in the harness rather than introducing test-only production branches; a real filesystem security boundary needs stronger containment checks.
 
 ### Layer 4: Debug Instrumentation
 **Purpose:** Capture context for forensics
@@ -89,11 +90,11 @@ async function gitInit(directory: string) {
 When you find a bug:
 
 1. **Trace the data flow** - Where does bad value originate? Where used?
-2. **Map all checkpoints** - List every point data passes through
-3. **Add validation at each layer** - Entry, business, environment, debug
-4. **Test each layer** - Try to bypass layer 1, verify layer 2 catches it
+2. **Identify boundaries** - Find the authoritative control and independently reachable paths
+3. **Justify each check** - Name the distinct invariant or bypass it addresses
+4. **Verify meaningful failures** - Reuse existing coverage; add cases only for unprotected paths or invariants
 
-## Example from Session
+## Example
 
 Bug: Empty `projectDir` caused `git init` in source code
 
@@ -103,20 +104,8 @@ Bug: Empty `projectDir` caused `git init` in source code
 3. `WorkspaceManager.createWorkspace('')`
 4. `git init` runs in `process.cwd()`
 
-**Four layers added:**
-- Layer 1: `Project.create()` validates not empty/exists/writable
-- Layer 2: `WorkspaceManager` validates projectDir not empty
-- Layer 3: `WorktreeManager` refuses git init outside tmpdir in tests
-- Layer 4: Stack trace logging before git init
-
-**Result:** All 1847 tests passed, bug impossible to reproduce
+Reject an empty directory at the authoritative entry point and fix the test setup. Add validation in `WorkspaceManager` only if it is independently callable without that entry contract. Keep test directory restrictions in the harness when possible. Use temporary logging only if needed to locate the source, then remove it.
 
 ## Key Insight
 
-All four layers were necessary. During testing, each layer caught bugs the others missed:
-- Different code paths bypassed entry validation
-- Mocks bypassed business logic checks
-- Edge cases on different platforms needed environment guards
-- Debug logging identified structural misuse
-
-**Don't stop at one validation point.** Add checks at every layer.
+Several controls can be necessary, but each must protect a concrete property. More checks and more tests do not establish correctness by themselves. Preserve useful independent controls and remove redundant checks only after verifying their callers and contracts.

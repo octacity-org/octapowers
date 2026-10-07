@@ -20,19 +20,26 @@ Subagent (general-purpose):
 
     [PLAN_OR_REQUIREMENTS]
 
-    ## Git Range to Review
+    ## Changes to Review
 
-    **Base:** [BASE_SHA]
-    **Head:** [HEAD_SHA]
+    [CHANGE_SCOPE — paths and whether changes are unstaged, staged, both,
+    or a committed base/head range. Include relevant untracked files.]
 
-    ```bash
-    git diff --stat [BASE_SHA]..[HEAD_SHA]
-    git diff [BASE_SHA]..[HEAD_SHA]
-    ```
+    Use the commands matching that scope; do not assume commits exist:
+    - Unstaged changes: `git diff --stat` and `git diff`.
+    - Staged changes: `git diff --cached --stat` and `git diff --cached`.
+    - Combined tracked changes: `git diff HEAD` when HEAD exists.
+    - Committed range: `git diff BASE_SHA..HEAD_SHA` for verified commits.
+
+    Read relevant untracked files directly; Git diffs do not include them.
 
     ## Read-Only Review
 
-    Your review is read-only on this checkout. Do not mutate the working tree, the index, HEAD, or branch state in any way. Use tools like `git show`, `git diff`, and `git log` to inspect history. If you need a working copy of a different revision, check it out into a separate temporary directory (e.g. `git worktree add /tmp/review-[SHA] [SHA]`) — never move HEAD on this checkout.
+    Your review is read-only on this checkout. Do not mutate the working tree,
+    index, HEAD, or branch state. Inspect other revisions with `git show`.
+    Create or enter a worktree only when the user explicitly requests that
+    isolation, following `using-git-worktrees`. If runtime comparison needs
+    unavailable isolation, report the limitation to the main agent.
 
     ## What to Check
 
@@ -128,8 +135,7 @@ Subagent (general-purpose):
 **Placeholders:**
 - `[DESCRIPTION]` — brief summary of what was built
 - `[PLAN_OR_REQUIREMENTS]` — what it should do (plan file path, task text, or requirements)
-- `[BASE_SHA]` — starting commit
-- `[HEAD_SHA]` — ending commit
+- `[CHANGE_SCOPE]` — relevant paths and diff source; include verified base/head commits only for a committed range
 
 **Reviewer returns:** Strengths, Issues (Critical / Important / Minor), Recommendations, Assessment
 

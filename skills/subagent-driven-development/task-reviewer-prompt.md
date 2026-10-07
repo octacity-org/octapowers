@@ -10,8 +10,6 @@ more, nothing less) and is well-built (clean, tested, maintainable)
 ```
 Subagent (general-purpose):
   description: "Review Task N (spec + quality)"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
   prompt: |
     You are reviewing one task's implementation: first whether it matches its
     requirements, then whether it is well-built. This is a task-scoped gate,
@@ -61,17 +59,17 @@ Subagent (general-purpose):
 
     ## Tests
 
-    The implementer already ran the tests and reported results with TDD
-    evidence for exactly this code. Do not re-run the suite to confirm their
-    report. Run a test only when reading the code raises a specific doubt
+    Inspect whether reported test results apply to this code; expect TDD
+    evidence when behavior changes required it. Do not re-run the suite merely
+    to confirm the report. Run a test only when code raises a specific doubt
     that no existing run answers — and then a focused test, never a
     package-wide suite, race detector run, or repeated/high-count loop. If
     heavy validation seems warranted, recommend it in your report instead of
     running it. If you cannot run commands in this environment, name the
     test you would run.
 
-    Warnings or other noise in the implementer's reported test output are
-    findings — test output should be pristine.
+    Report new actionable warnings with their impact. Distinguish expected
+    or pre-existing output from regressions; noise alone is not a defect.
 
     ## Part 1: Spec Compliance
 
@@ -164,7 +162,6 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection
 - `[BRIEF_FILE]` — REQUIRED: the task brief file (`scripts/task-brief PLAN N`
   prints the path; same file the implementer worked from)
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from

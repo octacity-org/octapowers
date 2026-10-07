@@ -114,6 +114,7 @@ Large or ambitious requests do not automatically create written artifacts or app
 - `creating-github-work`: evidence-based issue and pull-request creation
 - `fixing-github-work`: scoped implementation from issues and pull requests
 - `language-style`: compact, project-compatible conventions for supported languages
+- `simplify`: clearer implementations and behavior-preserving refactoring
 - `writing-plans`: opt-in written implementation plans
 - `systematic-debugging`
 - `security-review`

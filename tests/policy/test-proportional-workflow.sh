@@ -16,6 +16,10 @@ receiving_review="$repo_root/skills/receiving-code-review/SKILL.md"
 requesting_review="$repo_root/skills/requesting-code-review/SKILL.md"
 debugging="$repo_root/skills/systematic-debugging/SKILL.md"
 verification="$repo_root/skills/verification-before-completion/SKILL.md"
+defense="$repo_root/skills/systematic-debugging/defense-in-depth.md"
+implementer="$repo_root/skills/subagent-driven-development/implementer-prompt.md"
+task_reviewer="$repo_root/skills/subagent-driven-development/task-reviewer-prompt.md"
+code_reviewer="$repo_root/skills/requesting-code-review/code-reviewer.md"
 
 assert_contains() {
   local file="$1"
@@ -93,6 +97,16 @@ assert_contains "$tdd" '“Do not write tests” does not also mean “do not ru
 assert_contains "$tdd" "Do not use for trivial mechanical edits"
 assert_contains "$executing" 'Use `subagent-driven-development` only when the user explicitly requests it.'
 assert_contains "$executing" 'Use `using-git-worktrees` only when the user explicitly requests a worktree.'
+assert_contains "$executing" "Investigate ordinary test failures"
+assert_contains "$router" "A written design is prerequisite only when unresolved product or architectural decisions require it."
+assert_contains "$defense" "Each additional check needs a distinct invariant, trust boundary, or independently reachable path."
+assert_contains "$code_reviewer" "Unstaged changes:"
+assert_contains "$code_reviewer" "Staged changes:"
+assert_not_contains "$defense" "Validate at EVERY layer"
+assert_not_contains "$implementer" "SKILL.md Model Selection"
+assert_not_contains "$task_reviewer" "SKILL.md Model Selection"
+assert_not_contains "$implementer" "full suite once before reporting"
+assert_not_contains "$code_reviewer" "git worktree add"
 assert_contains "$subagents" "only when the user explicitly requests subagent-driven development"
 assert_contains "$subagents" "Do not trigger for generic delegation, parallel-agent requests"
 assert_contains "$subagents" "Do not create per-task commits."

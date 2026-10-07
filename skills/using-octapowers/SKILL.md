@@ -43,7 +43,7 @@ Create a written design or implementation plan only when the user explicitly req
 When the user explicitly requests a written design or implementation plan:
 
 - use `brainstorming` for the written design;
-- obtain user approval of the design before creating a written implementation plan;
+- A written design is prerequisite only when unresolved product or architectural decisions require it. Obtain design approval before planning in that case;
 - obtain user approval of the implementation plan before implementation, unless the user explicitly authorizes automatic execution after planning.
 
 An ambitious request by itself is not a request for a written artifact or an approval gate. For large requests stated as "build," "implement," "fix," or equivalent, create any useful internal spec or plan privately and keep moving.
@@ -55,6 +55,7 @@ Invoke a skill when its specialized workflow materially helps the task or the us
 - Bugs and unexpected behavior: use `systematic-debugging`.
 - Security-sensitive implementation, an explicit security assessment, or a targeted security property: use `security-review`.
 - Performance problems, explicit optimization work, or a specific metric target: use `performance-investigation`.
+- Simplification, refactoring, or cleanup requests, and substantial restructuring necessary for an authorized change: use `simplify`. Pure refactors use a green baseline and existing coverage; behavior changes use TDD.
 - Use `test-driven-development` by default for every non-tiny implementation or behavior change. Skip it for trivial mechanical edits. Skip TDD when the user explicitly says not to write tests, not to use TDD, or gives an equivalent instruction.
 - Before claiming completion: use `verification-before-completion`.
 - Brainstorming, ideation, option exploration, or written design explicitly requested: use `brainstorming`. Only the written-design mode creates an artifact and approval gate.
